@@ -1,3 +1,5 @@
+const { getDB } = require('../data/database');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -24,8 +26,25 @@ const data = {
     }
 };
 
-const getData = (req, res) => {
-    res.status(200).json(data);
+const getData = async (req, res) => {
+    try {
+        const profile = await getDB()
+            .collection('professional')
+            .findOne({ _id: 'main-profile' });
+
+        if (!profile) {
+            return res.status(404).json({
+                message: 'Profile not found'
+            });
+        }
+
+        res.status(200).json(profile);
+    } catch (error) {
+        console.error('Could not load profile:', error.message);
+        res.status(500).json({
+            message: 'Could not load profile'
+        });
+    }
 };
 
-module.exports = { getData };
+module.exports = { getData, data };
